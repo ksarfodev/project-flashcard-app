@@ -22,6 +22,7 @@ function DeckEdit(){
     const handleSubmit = (event) => {
         event.preventDefault();
         setUpdatedDeck(formData);
+        history.goBack();
       };
 
       const handleCancel = (event) => {
@@ -72,7 +73,7 @@ function DeckEdit(){
     
    //update
    useEffect(() => {
-
+if(updatedDeck.name){
     const abortController = new AbortController(); // Create a new `AbortController`
   
     async function modifyDeck() {
@@ -80,6 +81,7 @@ function DeckEdit(){
         //api
         updateDeck(updatedDeck);
        console.log("updating new deck",updatedDeck)
+  
       } catch (error) {
         if (error.name !== "AbortError") {
           throw error;
@@ -92,6 +94,7 @@ function DeckEdit(){
     return () => {
       abortController.abort(); // Cancels any pending request or response
     };
+  }
   }, [updatedDeck]);//when newDeck is set
      
     return(

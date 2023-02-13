@@ -46,8 +46,11 @@ function NewCard(){
         async function addNewCard() {
           try {
             //api
-           // createCard(deckId,newCard);
+           createCard(deckId,newCard);
            console.log("creating new card", newCard)
+           setFormData({
+            ...initialFormState
+          });
           } catch (error) {
             if (error.name !== "AbortError") {
               throw error;

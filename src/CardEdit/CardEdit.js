@@ -1,6 +1,6 @@
 import { Route, Switch,Link,useHistory ,useParams} from "react-router-dom";
 import React, { useState,useEffect } from "react";
-import { readCard,updateCard } from "../utils/api";
+import { readCard,updateCard,readDeck } from "../utils/api";
 
 
 
@@ -22,6 +22,7 @@ function CardEdit(){
     const handleSubmit = (event) => {
         event.preventDefault();
         setUpdatedCard(formData);
+        history.goBack();
       };
 
       const handleCancel = (event) => {
@@ -31,7 +32,6 @@ function CardEdit(){
       };
 
       const handleChange = ({ target }) => {
-       console.log("handling change...")
         const value = target.value;
         setFormData({
           ...formData,
@@ -41,9 +41,38 @@ function CardEdit(){
 
       useEffect(()=>{
         setFormData({...formData,...card});
-        console.log(formData)
+       // console.log(formData)
 
       },[card])
+
+      const [deck, setDeck] = useState({});
+      const {deckId} = useParams();
+ useEffect(() => {
+
+  const abortController = new AbortController(); // Create a new `AbortController`
+
+  async function getDeck() {
+    try {
+     const deckFromAPI = await readDeck(deckId);
+    
+      setDeck(deckFromAPI);
+   
+
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        throw error;
+      }
+    }
+  }
+
+  getDeck();
+
+  return () => {
+   // console.log("cleanup");
+    abortController.abort(); // Cancels any pending request or response
+  };
+
+}, []);//whenever deckId changes
 
       useEffect(() => {
    
@@ -68,18 +97,19 @@ function CardEdit(){
         return () => {
           abortController.abort(); // Cancels any pending request or response
         };
-      }, []);//when updatedDeck is set
+      }, [deck]);//when updatedDeck is set
     
    //update
    useEffect(() => {
-
+if(updatedCard.front !== ''){
     const abortController = new AbortController(); // Create a new `AbortController`
   
     async function modifyCard() {
       try {
         //api
-       // updateCard(updatedCard);
-       console.log("updating new deck",updatedCard)
+        console.log("updating card",updatedCard)
+        updateCard(updatedCard);
+
       } catch (error) {
         if (error.name !== "AbortError") {
           throw error;
@@ -92,6 +122,7 @@ function CardEdit(){
     return () => {
       abortController.abort(); // Cancels any pending request or response
     };
+  }
   }, [updatedCard]);//when newDeck is set
      
     return(
@@ -102,12 +133,14 @@ function CardEdit(){
             <li className="breadcrumb-item">
                 <Link to="/">Home</Link>
                 </li>
-            <li className="breadcrumb-item active" aria-current="page">{card.name}</li>
+            <li className="breadcrumb-item active" aria-current="page">
+             <Link to={`/decks/${deck.id}`}>Deck {deck.name}</Link> 
+              </li>
             <li className="breadcrumb-item active" aria-current="page">Edit Card {card.id}</li>
         </ol>
         </nav>
 
-        <h2>Update Deck</h2>
+        <h2>Edit Card</h2>
 
         <form  onSubmit={handleSubmit}>
         <div className="form-group">

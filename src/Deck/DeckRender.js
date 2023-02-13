@@ -1,17 +1,29 @@
 import { Route, Switch,Link,useHistory,useParams } from "react-router-dom";
 import CardRender from "./CardRender";
 import React, { useEffect, useState } from "react";
-import { deleteCard } from "../utils/api";
+import { deleteCard,deleteDeck } from "../utils/api";
+import Study from "../Study/Study";
 
 function DeckRender({ deck: { id,name, description, cards } }) {
 
 
 
     const [cardId, setCardId] = useState(0);
+    const[deckToDelete,setDeckToDelete] = useState(0);
     const {deckId} = useParams();
 
     const message = "Delete this card? You will not be able to recover it.";
+    const deckMessage = "Delete this deck? You will not be able to recover it.";
     const history = useHistory();
+
+    function handleDeckDelete(){
+      if (window.confirm(deckMessage)) {
+        setDeckToDelete(id);
+
+        history.push("/"); 
+     
+      }
+    }
 
     function handleDelete(cardId){
 
@@ -19,6 +31,8 @@ function DeckRender({ deck: { id,name, description, cards } }) {
       
         if (window.confirm(message)) {
             setCardId(cardId);
+
+            history.go(0); //refresh
          
            //console.log("handling delete",id);
           }
@@ -32,14 +46,44 @@ function DeckRender({ deck: { id,name, description, cards } }) {
     useEffect(() => {
 
       
+      if(deckToDelete > 0){
+      const abortController = new AbortController(); // Create a new `AbortController`
+    
+      async function deleteDeckById() {
+        try {
+  
+        console.log("deleting deck...",id)
+         await deleteDeck(id);
+       
+  
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            throw error;
+          }
+        }
+      }
+      deleteDeckById();
+    
+      return () => {
+        //console.log("cleanup");
+
+        abortController.abort(); // Cancels any pending request or response
+      };
+  }
+  
+    }, [deckToDelete]);//whenever deckId changes
+
+    useEffect(() => {
+
+      
         if(cardId > 0){
         const abortController = new AbortController(); // Create a new `AbortController`
       
         async function deleteCardById() {
           try {
     
-          console.log("deleting...")
-          // await deleteCard(deletedCard);
+          console.log("deleting...",cardId)
+           await deleteCard(cardId);
          
     
           } catch (error) {
@@ -48,7 +92,6 @@ function DeckRender({ deck: { id,name, description, cards } }) {
             }
           }
         }
-      
         deleteCardById();
       
         return () => {
@@ -90,34 +133,33 @@ function DeckRender({ deck: { id,name, description, cards } }) {
           <Link to={`/decks/${id}/edit`}  className="ml-0 mr-2 btn btn-secondary">
             Edit
           </Link>
-          <a href="#" className="ml-0 mr-2 btn btn-primary">
+          <Link to={`/decks/${id}/study`}  className="ml-0 mr-2 btn btn-primary">
             Study
-          </a>
+          </Link>
           <Link to={`/decks/${id}/cards/new`}  className="ml-0 mr-2 btn btn-primary">
             Add Cards
           </Link>
-          <a className="mr-2 float-right btn btn-danger">
+          <button onClick={handleDeckDelete} className="mr-2 float-right btn btn-danger">
             Delete
-          </a>
+          </button>
         </div>
       </div>
-       {/* Cards */}
-       <h2 className="mt-4 mb-3">Cards</h2>
-       <ul className="mb-3 list-group">
-           {
-            cards.map((card,index)=>(
-            <li key={index} className="list-group-item">
-                <CardRender handleEdit={handleEdit} handleDelete={handleDelete} card={card}/>
-            </li>
-            ))
-           }
-       </ul>
-       
-
+      
+          {/* Cards */}
+          <h2 className="mt-4 mb-3">Cards</h2>
+                <ul className="mb-3 list-group">
+                    {
+                      cards.map((card,index)=>(
+                      <li key={index} className="list-group-item">
+                          <CardRender handleEdit={handleEdit} handleDelete={handleDelete} card={card}/>
+                      </li>
+                      ))
+                    }
+                </ul>
     </>
   );
 }
-return <p>...</p>;
+return <p>Loading...</p>;
 }
 
 

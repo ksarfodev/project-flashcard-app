@@ -8,6 +8,7 @@ import { Route, Switch, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import NewCard from "../NewCard/NewCard";
 import CardEdit from "../CardEdit/CardEdit";
+import Study from "../Study/Study";
 
 function Layout() {
   return (
@@ -40,6 +41,9 @@ function Layout() {
           </Route>
           <Route exact path={"/decks/:deckId/cards/:cardId/edit"}>
             <CardEdit />
+          </Route>
+          <Route exact path={"/decks/:deckId/study"}>
+            <Study />
           </Route>
     
           {/* </Route> */}

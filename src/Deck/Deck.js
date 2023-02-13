@@ -8,10 +8,10 @@ function Deck(){
 
     const {deckId} = useParams();
 
-    const [deck, setDeck] = useState({});
+
 
     const[deckToEdit,setDeckToEdit] = useState({});
-
+    const [deck, setDeck] = useState({});
 
  useEffect(() => {
 
@@ -72,14 +72,8 @@ function Deck(){
   }
 
     return (
-   <Switch>
-    <Route>
+
         <DeckRender handleEdit={handleEdit} deck={deck}/>
-    </Route>
-    <Route>
-        
-    </Route>
-   </Switch>
   
     );
 }

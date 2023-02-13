@@ -18,6 +18,7 @@ function NewDeck(){
     const handleSubmit = (event) => {
         event.preventDefault();
         setNewDeck(formData);
+        history.goBack();
       };
 
       const handleCancel = (event) => {
