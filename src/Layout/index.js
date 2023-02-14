@@ -1,16 +1,31 @@
+import React, { useEffect,useState } from "react";
+import { Route, Switch,Link} from "react-router-dom";
 import Header from "./Header";
 import NotFound from "./NotFound";
-import DecksList from "../DecksList/DecksList";
-import NewDeck from "../NewDeck/NewDeck";
+import { listDecks } from "../utils/api";
 import Deck from "../Deck/Deck";
-import DeckEdit from "../DeckEdit/DeckEdit";
-import { Route, Switch, Link } from "react-router-dom";
-import React, { useState, useEffect } from "react";
-import NewCard from "../NewCard/NewCard";
-import CardEdit from "../CardEdit/CardEdit";
+import DeckEdit from "../Deck/DeckEdit";
+import NewDeck from "../Deck/NewDeck";
+import Home from "../Home/Home";
 import Study from "../Study/Study";
+import CardEdit from "../Card/CardEdit";
+import NewCard from "../Card/NewCard";
 
+
+//starting point
 function Layout() {
+
+  const [decks, setDecks] = useState([]);
+
+  //on load, get decks using api
+  useEffect(()=> {
+    async function loadDecks() {
+        const decksFromAPI = await listDecks();
+        setDecks(decksFromAPI);
+      }
+    loadDecks();
+  },[]);
+
   return (
     <>
       <Header />
@@ -18,35 +33,39 @@ function Layout() {
         {/* TODO: Implement the screen starting here */}
         <Switch>
           <Route exact path="/">
+          {/* Home Screen */}
             <Link
               to="/decks/new"
               className="ml-0 mb-2 btn btn-secondary btn-lg"
             >
               <i className="plus-circle"></i> Create Deck
             </Link>
-            <DecksList />
+            <Home />
           </Route>
+           {/* Create Deck */}
           <Route exact path={"/decks/new"}>
             <NewDeck />
           </Route>
-          {/* <Route> */}
+          {/* Individual Deck */}
           <Route exact path={"/decks/:deckId"}>
-            <Deck />
+            <Deck  />
           </Route>
+          {/* Edit Deck */}
           <Route exact path={"/decks/:deckId/edit"}>
             <DeckEdit />
           </Route>
+          {/* Create Card */}
           <Route exact path={"/decks/:deckId/cards/new"}>
             <NewCard />
           </Route>
+          {/* Edit Card */}
           <Route exact path={"/decks/:deckId/cards/:cardId/edit"}>
             <CardEdit />
           </Route>
+          {/* Study Screen */}
           <Route exact path={"/decks/:deckId/study"}>
             <Study />
           </Route>
-    
-          {/* </Route> */}
           <Route>
             <NotFound />
           </Route>

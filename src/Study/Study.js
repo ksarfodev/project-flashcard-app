@@ -1,183 +1,98 @@
-import { Route, Switch,Link,useHistory,useParams } from "react-router-dom";
-
+import { useHistory, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
+import NotEnoughCards from "./NotEnoughCards";
+import StudyView from "./StudyView";
 import { readDeck } from "../utils/api";
 
+//route:"/decks/:deckId/study"
 function Study() {
+  const restartMessage = "Reset cards? Click 'cancel' to return the home page.";
 
-    const initialValue = 0;
+  const history = useHistory();
+  const { deckId } = useParams();
 
-    const [cardId, setCardId] = useState(0);
-    const [totalCards,setTotalCards] = useState(0);
+  const [totalCards, setTotalCards] = useState(0);
+  const [cardSide, setCardSide] = useState("");
+  const [cardBeingStudied, setCardBeingStudied] = useState(0);
+  const [nextBtnEnable, setNextBtnEnable] = useState(false);
+  const [deck, setDeck] = useState({});
 
-    const [cardSide,setCardSide] = useState('');
-    const {deckId} = useParams();
-    const history = useHistory();
-
-  
-    const [currentCard,setCurrentCard] = useState(initialValue);
-
-    const [proceed,setProceed] = useState(false);
-
-
-    function handleEdit(cardId){
-      history.push(`/decks/${deckId}/cards/${cardId}/edit`);
+  //on load, get deck by id
+  useEffect(() => {
+    async function getDeck() {
+      const deckFromAPI = await readDeck(deckId);
+      setDeck(deckFromAPI);
     }
+    getDeck();
+  }, []);
 
-    const [deck, setDeck] = useState({});
-
-   // const{cards} = deck;
-
-   useEffect(() => {
-    console.log(deck.cards)
-    if(deck.cards && deck.cards.length !== 0){
-       setTotalCards(deck.cards.length);
-       setCardSide(deck.cards[currentCard].front);
-
-       console.log(cardSide)
-       console.log(currentCard)
+  //whevever the deck updates, refresh totalCards and set card to display front
+  useEffect(() => {
+    //dont attempt to flip a card or set otal value if deck is invalid
+    if (deck.cards && deck.cards.length !== 0) {
+      setTotalCards(deck.cards.length);
+      setCardSide(deck.cards[cardBeingStudied].front);
     }
+  }, [deck]);
 
-  }, [deck])
-
-  useEffect(()=>{
-    if(deck.cards){
-        setCardSide (deck.cards[currentCard].front);
-        setProceed(false);
+  //run when corresponding index id of card being studied increments
+  useEffect(() => {
+    if (deck.cards) {
+      //show front of card
+      setCardSide(deck.cards[cardBeingStudied].front);
+      //hide next button
+      setNextBtnEnable(false);
     }
+  }, [cardBeingStudied]);
 
-  },[currentCard])
-
-    useEffect(() => {
-        const abortController = new AbortController(); // Create a new `AbortController`
-        async function getDeck() {
-          try {
-           const deckFromAPI = await readDeck(deckId);
-            setDeck(deckFromAPI);
-
-          } catch (error) {
-            if (error.name !== "AbortError") {
-              throw error;
-            }
-          }
-        }
-      
-        getDeck();
-
-        return () => {
-         // console.log("cleanup");
-          abortController.abort(); // Cancels any pending request or response
-        };
-    
-      }, []);//whenever deckId changes
-
-
-   function handleFlip(){
-     const {cards} = deck;
-    if(cardSide === cards[currentCard].front){
-        setCardSide(cards[currentCard].back);
-        setProceed(true);
-    }else{
-        setCardSide (cards[currentCard].front);
-       // setProceed(false);
+  //logic for flipping card
+  function handleFlip() {
+    const { cards } = deck;
+    //the front of the card is being shown
+    if (cardSide === cards[cardBeingStudied].front) {
+      //show the back of the card
+      setCardSide(cards[cardBeingStudied].back);
+      //enable the next button so it appears
+      setNextBtnEnable(true);
+    } else {
+      //back of card is visible, show the front
+      setCardSide(cards[cardBeingStudied].front);
     }
-   }
+  }
 
-   function handleNext(){
+  function handleNext() {
     //console.log("current card #",currentCard)
-    if(currentCard < deck.cards.length-1)
-    {
-        setCurrentCard((currentValue) => ++currentValue);
+    if (cardBeingStudied < deck.cards.length - 1) {
+      setCardBeingStudied((currentValue) => currentValue + 1);
     }
 
-    if(currentCard > deck.cards.length-2 )
-    {
-        if (window.confirm("Reset cards?  Click 'cancel' to return the home page.")) {
-            setCurrentCard(0);
-        }else{
-           history.push("/");
-        }
+    //check if the value of cardBeingStudied exceeds the number of cards
+    if (cardBeingStudied > deck.cards.length - 2) {
+      //if true, give user option to restart and set cardBeingStudied to 0
+      //or cancel by going to the Home screen
+      window.confirm(restartMessage)
+        ? setCardBeingStudied(0)
+        : history.push("/");
     }
-    
-   }
+  }
 
-
-
-   if(deck.cards && deck.cards.length < 3)
-   {
-   // setCardSide(deck.cards[currentCard].front);
-
+  //design requirements specify there must be at least 3 cards in deck
+  if (deck.cards && deck.cards.length < 3) {
+    return <NotEnoughCards deck={deck} deckId={deckId} />;
+  }
   return (
-    <>
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            <Link to={`/decks/${deckId}`}>{deck.name}</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            Study
-          </li>
-        </ol>
-      </nav>
-
-
-       {/* Cards */}
-       <h2 className="mt-4 mb-3">{deck.name}: Study</h2>
-       <h3>Not enough cards.</h3>
-       <p>You need at least 3 cards to study. There are {deck.cards.length} cards in this deck.</p>
-       <Link to={`/decks/${deckId}/cards/new`}  className="ml-0 mr-2 btn btn-primary">
-            Add Cards
-          </Link>
-
-    
-    </>
+    //display study view containing 3 or more cards
+    <StudyView
+      deck={deck}
+      cardSide={cardSide}
+      deckId={deckId}
+      currentCard={cardBeingStudied}
+      totalCards={totalCards}
+      handleFlip={handleFlip}
+      handleNext={handleNext}
+      proceed={nextBtnEnable}
+    />
   );
-   }
-   return (
-    <>
-     <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            <Link to={`/decks/${deckId}`}>{deck.name}</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            Study
-          </li>
-        </ol>
-      </nav>
-    <h2>{deck.name}: Study</h2>
-        <div className="card">
-        <div className="card-body">
-          <h5 className="card-title">
-            Card {currentCard + 1 } of {totalCards}
-            
-          </h5>
-          {cardSide}
-
-         
-        </div>
-        <div>
-        <button onClick={handleFlip} className="ml-3 mb-3 btn btn-secondary">
-            Flip
-          </button> 
-          {proceed && ( <button onClick={handleNext} className="ml-3 mb-3 btn btn-primary">
-         Next </button> )} 
-          
-          
-        </div>
-     
-      </div>
-    </>
-   );
 }
-
-
-
 
 export default Study;
