@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { deleteDeck } from "../utils/api";
+import React from "react";
 
 //used by Home.js to render list of decks and handle button events
 function RenderDeckList({ deck: { name, description, id, cards }, history }) {

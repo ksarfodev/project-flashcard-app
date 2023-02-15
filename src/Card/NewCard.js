@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { createCard, readDeck } from "../utils/api";
 import CardComponent from "../Card/CardComponent";
 
+
 //route:"/decks/:deckId/cards/new"
 function NewCard() {
   const initialFormState = {
@@ -35,14 +36,14 @@ function NewCard() {
   };
 
   //api call to create a new card
-  const handleSave = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     createCard(deckId, formData);
     setFormData({...initialFormState});
   };
 
   //navigate to Deck screen by id 
-  const handleDone = (event) => {
+  const handleCancel = (event) => {
     event.preventDefault();
     history.push(`/decks/${deckId}`);
   };
@@ -63,11 +64,11 @@ function NewCard() {
           </li>
         </ol>
       </nav>
-      {/* Form */}
+ 
       <h2>{deck.name}: Add Card</h2>
-
-      <CardComponent formData={formData} handleSubmit={handleSave}
-      handleChange={handleChange} handleCancel={handleDone}/>
+     {/* Form */}
+      <CardComponent formData={formData} handleSubmit={handleSubmit}
+      handleChange={handleChange} handleCancel={handleCancel}/>
     </>
   );
 }

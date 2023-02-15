@@ -19,11 +19,25 @@ function Layout() {
 
   //on load, get decks using api
   useEffect(()=> {
+    const abortController = new AbortController(); // Create a new `AbortController`
+
     async function loadDecks() {
+      try {
         const decksFromAPI = await listDecks();
         setDecks(decksFromAPI);
+
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          throw error;
+        }
       }
-    loadDecks();
+    
+    return () => {
+      abortController.abort(); // Cancels any pending request or response
+    };
+  }
+  loadDecks();
+ 
   },[]);
 
   return (

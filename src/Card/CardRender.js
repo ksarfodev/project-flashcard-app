@@ -1,5 +1,6 @@
 import { useHistory,useParams } from "react-router-dom";
 import { deleteCard } from "../utils/api";
+import React from "react";
 
 //Used by Deck.js to display individual cards and handle button press events
 function CardRender({ card }) {

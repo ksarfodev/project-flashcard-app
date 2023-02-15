@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import React from "react";
 
 //view used by Study.js to notify the user of having less than 3 cards
 function NotEnoughCards({ deck, deckId }) {

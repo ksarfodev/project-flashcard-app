@@ -79,8 +79,9 @@ function CardEdit() {
           </li>
         </ol>
       </nav>
-      {/* Form */}
+  
       <h2>Edit Card</h2>
+      {/* Form */}
       <CardComponent formData={formData} handleSubmit={handleSubmit}
       handleChange={handleChange} handleCancel={handleCancel}/>
     </>

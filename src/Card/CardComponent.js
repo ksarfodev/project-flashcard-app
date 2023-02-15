@@ -1,4 +1,6 @@
 //shared component 
+import React from "react";
+
 function CardComponent({formData,handleSubmit,handleChange,handleCancel}){
     return (
         <>
