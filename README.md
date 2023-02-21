@@ -1,5 +1,13 @@
 # project-flashcard-app
 
+## Background
+The purpose of this web app is to provide an end-user with the ability to create digital flashcards for studying using a web browser.
+A user can create, update or delete a deck of flashcards. Each deck must have at least 3 cards in order to use the Study feature.
+The project is built using React and Bootstrap 4 in the Visual Studio Code IDE for automated testing and debugging.
+
+Todo Items:
+The 'Edit Deck' and 'Create Deck' could use a shared component
+
 ## WebApp Layout
 * Layout/Index.js contains the routes to various pages
   * "Create Deck" button navigates to the Create Deck screen
